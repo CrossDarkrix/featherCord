@@ -22,6 +22,7 @@ task_list = []
 url_list = [{}]
 stopped = [False]
 
+
 def connect_db(user_id: str='', password: str='', token: str=''):
     if not os.path.exists(os.path.join(os.getcwd(), '.setting_twitter')):
         os.makedirs(os.path.join(os.getcwd(), '.setting_twitter'), exist_ok=True)
@@ -49,6 +50,7 @@ def connect_db(user_id: str='', password: str='', token: str=''):
     _connect.close()
     return user, passwd, _token
 
+
 class Tweeter(object):
     def __init__(self):
         self.app = Twitter('session')
@@ -58,9 +60,16 @@ class Tweeter(object):
 
     def new_tweet(self, user):
         try:
-            return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[0].url
+            return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[1].url
         except:
-            return ''
+            try:
+                _t, _ = self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[0]
+                return _t.url
+            except:
+                try:
+                    return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[1].url
+                except:
+                    return 'ツイートの取得に失敗しました'
 
 
 class TweetDiscord(commands.Cog):
@@ -72,7 +81,7 @@ class TweetDiscord(commands.Cog):
     @discord.slash_command(name="set_tweet", description="設定したアカウントのツイートを監視します")
     async def set_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         try:
-            await cx.response.send_message(content='監視ユーザーを設定しました 設定ユーザー名: {}'.format(username))
+            await cx.response.send_message(content='監視ユーザーを設定しました 設定ユーザー名: {}'.format(username), ephemeral=True)
         except:
             pass
         self.data = {'TwUser': username, username: {'url': ''}}
@@ -131,13 +140,14 @@ class TweetDiscord(commands.Cog):
     async def get_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         text = self.twitter.new_tweet(username)
         if text != '':
-            await cx.response.send_message(content=text)
+            await cx.response.send_message(content=text, ephemeral=True)
         else:
-            await cx.response.send_message(content='ツイートの取得に失敗しました')
+            await cx.response.send_message(content='ツイートの取得に失敗しました', ephemeral=True)
+
 
 @Bot.event
 async def on_ready():
-    await Bot.change_presence(activity=discord.Game('BOTが正常に起動ました！(v1.0.0)'))
+    await Bot.change_presence(activity=discord.Game('BOTが正常に起動ました！'))
 
 
 def TimeCount():
@@ -237,6 +247,7 @@ def main():
         TimeCount()
         Bot.add_cog(TweetDiscord(Bot))
         Bot.run(TOKEN)
+
 
 if __name__ == '__main__':
     try:
