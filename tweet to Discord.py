@@ -60,14 +60,14 @@ class Tweeter(object):
 
     def new_tweet(self, user):
         try:
-            return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[1].url
+            return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[0].url
         except:
             try:
                 _t, _ = self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[0]
                 return _t.url
             except:
                 try:
-                    return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[1].url
+                    return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[0].url
                 except:
                     return 'ツイートの取得に失敗しました'
 
