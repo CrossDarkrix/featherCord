@@ -96,19 +96,19 @@ class TweetDiscord(commands.Cog):
                 if data['TwUser'] == user:
                     if data[user]['url'] != now_url:
                         data[user]['url'] = now_url
-                        await cx.send(content=now_url)
+                        await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
                 else:
                     continue
             if not self.search(user, url_list):
                 _data = {'TwUser': user, user: {'url': ''}}
                 _data[user]['url'] = now_url
                 url_list.append(_data)
-                await cx.send(content=now_url)
+                await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
         else:
             _data = {'TwUser': user, user: {'url': ''}}
             _data[user]['url'] = now_url
             url_list[0] = _data
-            await cx.send(content=now_url)
+            await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
         url_list[1:] = list({u['TwUser']: u for u in url_list}.values())
 
     def search(self, key, list):
