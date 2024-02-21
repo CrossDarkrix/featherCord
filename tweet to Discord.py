@@ -71,6 +71,19 @@ class Tweeter(object):
                 except:
                     return 'ツイートの取得に失敗しました'
 
+    def old_tweet(self, user):
+        try:
+            return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[1].url
+        except:
+            try:
+                tweet, _ = self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[1]
+                return tweet.url
+            except:
+                try:
+                    return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[1].url
+                except:
+                    return 'ツイートの取得に失敗しました'
+
 
 class TweetDiscord(commands.Cog):
     def __init__(self, Bot: commands.Bot):
@@ -95,20 +108,35 @@ class TweetDiscord(commands.Cog):
             for data in url_list:
                 if data['TwUser'] == user:
                     if data[user]['url'] != now_url:
-                        data[user]['url'] = now_url
-                        await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
+                        try:
+                            await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
+                            data[user]['url'] = now_url
+                        except:
+                            now_url = self.twitter.old_tweet(user)
+                            await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
+                            data[user]['url'] = now_url
                 else:
                     continue
             if not self.search(user, url_list):
                 _data = {'TwUser': user, user: {'url': ''}}
-                _data[user]['url'] = now_url
+                try:
+                    await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
+                    _data[user]['url'] = now_url
+                except:
+                    now_url = self.twitter.old_tweet(user)
+                    await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
+                    _data[user]['url'] = now_url
                 url_list.append(_data)
-                await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
         else:
             _data = {'TwUser': user, user: {'url': ''}}
-            _data[user]['url'] = now_url
             url_list[0] = _data
-            await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
+            try:
+                await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
+                _data[user]['url'] = now_url
+            except:
+                now_url = self.twitter.old_tweet(user)
+                await cx.send(content=now_url.replace('https://x.com/', 'https://fxtwitter.com/').replace('https://twitter.com/', 'https://fxtwitter.com/'))
+                _data[user]['url'] = now_url
         url_list[1:] = list({u['TwUser']: u for u in url_list}.values())
 
     def search(self, key, list):
