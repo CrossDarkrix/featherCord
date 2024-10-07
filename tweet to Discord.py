@@ -22,7 +22,6 @@ Bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
 task_list = []
 url_list = [{}]
-_urls = []
 stopped = [False]
 
 
@@ -88,7 +87,6 @@ class Tweeter(object):
                     return 'ツイートの取得に失敗しました'
 
 
-
 class TweetDiscord(commands.Cog):
     def __init__(self, Bot: commands.Bot):
         self.bot = Bot
@@ -102,13 +100,24 @@ class TweetDiscord(commands.Cog):
         except:
             pass
         self.data = {'TwUser': username, username: {'url': ''}}
+        _urls = []
         task = tasks.loop(minutes=1)(self.auto_refresh_for_new_tweet)
         task_list.append(task)
-        task.start(username, cx)
+        task.start(username, cx, _urls)
 
-    async def auto_refresh_for_new_tweet(self, user, cx):
+    async def auto_refresh_for_new_tweet(self, user, cx, _urls: list):
+        def string_detect(string_text: str) -> bool:
+            len_text = 0
+            for strings in _urls:
+                if strings == string_text:
+                    len_text += 1
+            if 1 <= len_text:
+                return False
+            else:
+                return True
+
         now_url = self.twitter.new_tweet(user)
-        if self.string_detect(now_url):
+        if string_detect(now_url):
             _urls.append(now_url)
             if 2 <= len(url_list):
                 for data in url_list:
@@ -258,23 +267,13 @@ class TweetDiscord(commands.Cog):
             url_list[0:] = list({u['TwUser']: u for u in url_list}.values())
             _urls[0:] = list(set(_urls))
 
-    def search(self, key, list):
+    def search(self, key, lists):
         result = False
-        for t in list:
+        for t in lists:
             if key in t.keys():
                 result = True
                 break
         return result
-
-    def string_detect(self, string_text: str) -> bool:
-        len_text = 0
-        for strings in _urls:
-            if strings == string_text:
-                len_text += 1
-        if 1 <= len_text:
-            return False
-        else:
-            return True
 
     @discord.slash_command(name="set_stop", description="設定したアカウントの監視を停止します")
     async def set_stop(self, cx: discord.ApplicationContext):
