@@ -20,7 +20,7 @@ except Exception:
     pass
 Bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
-task_list = []
+task_data = []
 url_list = [{}]
 stopped = [False]
 
@@ -101,8 +101,8 @@ class TweetDiscord(commands.Cog):
             pass
         self.data = {'TwUser': username, username: {'url': ''}}
         _urls = []
-        task = tasks.loop(minutes=1)(self.auto_refresh_for_new_tweet)
-        task_list.append(task)
+        task = tasks.loop(seconds=45)(self.auto_refresh_for_new_tweet)
+        task_data.append({"username": username, "task_list": task})
         task.start(username, cx, _urls)
 
     async def auto_refresh_for_new_tweet(self, user, cx, _urls: list):
@@ -275,19 +275,18 @@ class TweetDiscord(commands.Cog):
                 break
         return result
 
-    @discord.slash_command(name="set_stop", description="設定したアカウントの監視を停止します")
-    async def set_stop(self, cx: discord.ApplicationContext):
-        for task in task_list:
-            try:
-                task.stop()
-            except:
-                pass
-            try:
-                task.cancel()
-            except:
-                pass
-        url_list.clear()
-        url_list.append({})
+    @discord.slash_command(name="set_stop", description="指定したアカウントの監視を停止します")
+    async def set_stop(self, cx: discord.ApplicationContext, user_name):
+        for _json in task_data:
+            if _json["username"] == user_name:
+                try:
+                    _json["task_list"].stop()
+                except:
+                    pass
+                try:
+                    _json["task_list"].cancel()
+                except:
+                    pass
         try:
             await cx.delete()
         except:
