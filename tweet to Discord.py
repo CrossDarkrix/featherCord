@@ -73,7 +73,7 @@ class Tweeter(object):
                 try:
                     return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[0].url
                 except:
-                    return 'ツイートの取得に失敗しました'
+                    return 'no get post'
 
     def old_tweet(self, user):
         try:
@@ -86,7 +86,7 @@ class Tweeter(object):
                 try:
                     return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[1].url
                 except:
-                    return 'ツイートの取得に失敗しました'
+                    return 'no get post'
 
 
 class TweetDiscord(commands.Cog):
@@ -94,10 +94,10 @@ class TweetDiscord(commands.Cog):
         self.bot = Bot
         self.twitter = Tweeter()
 
-    @discord.slash_command(name="set_tweet", description="設定したアカウントのツイートを監視します")
+    @discord.slash_command(name="set_tweet", description="monitoring set account posts")
     async def set_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         try:
-            await cx.response.send_message(content='監視ユーザーを設定しました 設定ユーザー名: {}'.format(username), ephemeral=True)
+            await cx.response.send_message(content='set UserName: {}'.format(username), ephemeral=True)
         except:
             pass
         _urls = []
@@ -157,7 +157,7 @@ class TweetDiscord(commands.Cog):
                     pass
             _urls[0:] = list(set(_urls))
 
-    @discord.slash_command(name="set_stop", description="指定したアカウントの監視を停止します")
+    @discord.slash_command(name="set_stop", description="stop monitoring account")
     async def set_stop(self, cx: discord.ApplicationContext, user_name):
         for _json in task_data:
             if _json["username"] == user_name:
@@ -174,15 +174,15 @@ class TweetDiscord(commands.Cog):
         except:
             pass
 
-    @discord.slash_command(name="get_tweet", description="指定したアカウントの最新のポストを取得します")
+    @discord.slash_command(name="get_tweet", description="get select account posts")
     async def get_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         text = self.twitter.new_tweet(username)
         if text != '':
             await cx.response.send_message(content=text, ephemeral=True)
         else:
-            await cx.response.send_message(content='ツイートの取得に失敗しました', ephemeral=True)
+            await cx.response.send_message(content='no get post', ephemeral=True)
 
-    @discord.slash_command(name="stop_all", description="Botをシャットダウンします")
+    @discord.slash_command(name="stop_all", description="shutdown bot")
     async def stop_all(self, cx: discord.ApplicationContext):
         await cx.delete()
         print('Bot is Stopped!')
@@ -196,7 +196,7 @@ class TweetDiscord(commands.Cog):
 
 @Bot.event
 async def on_ready():
-    await Bot.change_presence(activity=discord.Game('BOTは正常に起動(v0.0.1)'))
+    await Bot.change_presence(activity=discord.Game('Bot is Started!(v0.0.1)'))
 
 
 def TimeCount():
@@ -253,8 +253,7 @@ def TimeCount():
                 SSec = '0{}'.format(Sec)
             else:
                 SSec = '{}'.format(Sec)
-            print('稼働時間: {}年, {}週間, {}日, {}:{}:{}'.format(SYear, SWeek, SDay, SHour, SMinute, SSec), end='\r',
-                  flush=True)
+            print('稼働時間: {}year, {}week, {}day, {}:{}:{}'.format(SYear, SWeek, SDay, SHour, SMinute, SSec), end='\r', flush=True)
             time.sleep(1)
             Uptimeloop.append(i + 1)
 
@@ -263,33 +262,33 @@ def TimeCount():
 
 def main():
     ArgumentPaerser = argparse.ArgumentParser(description='TweetDiscord')
-    ArgumentPaerser.add_argument('--reset-login', '-rl', action='store_true', help='Twitterのログイン情報をリセットします')
-    ArgumentPaerser.add_argument('--refresh-login', '-rfl', action='store_true', help='Twitterのログイン情報を更新します')
-    ArgumentPaerser.add_argument('--reset-token', '-rt', action='store_true', help='Discordのトークン情報をリセットします')
-    ArgumentPaerser.add_argument('--remove-all', '-ra', action='store_true', help='全てのログイン情報を消去します')
+    ArgumentPaerser.add_argument('--reset-login', '-rl', action='store_true', help='reset login data for twitter.')
+    ArgumentPaerser.add_argument('--refresh-login', '-rfl', action='store_true', help='refresh twitter login data')
+    ArgumentPaerser.add_argument('--reset-token', '-rt', action='store_true', help='reset discord token')
+    ArgumentPaerser.add_argument('--remove-all', '-ra', action='store_true', help='all account data delete')
     arg = ArgumentPaerser.parse_args()
     if arg.reset_login:
-        print('ログイン情報をリセットします')
+        print('reset login data')
         try:
             os.remove(os.path.join(os.getcwd(), '.setting_twitter', 'loginInfo.db'))
         except:
             pass
-        connect_db(user_id=input('Twitterのユーザー名: '), password=input('Twitterのパスワード: '))
+        connect_db(user_id=input('Twitter(X) UserName: '), password=input('Twitter(X) Password: '))
     if arg.refresh_login:
-        print('ログイン情報を更新します')
-        connect_db(user_id=input('Twitterのユーザー名: '), password=input('Twitterのパスワード: '))
+        print('refresh login data')
+        connect_db(user_id=input('Twitter(X) UserName: '), password=input('Twitter(X) Password: '))
     if arg.reset_token:
-        print('トークン情報をリセットします')
-        connect_db(token=input('Discordのトークン: '))
+        print('reset token')
+        connect_db(token=input('discard token: '))
     if arg.remove_all:
-        print('ログイン情報を削除しています........')
+        print('delete all account data...')
         try:
             shutil.rmtree(os.path.join(os.getcwd(), '.setting_twitter'))
-            print('完了!')
+            print('done!')
         except:
-            print('何らかのエラーで削除できませんでした')
+            print('error')
     if not os.path.exists(os.path.join(os.getcwd(), '.setting_twitter', 'loginInfo.db')):
-        connect_db(user_id=input('Twitterのユーザー名: '), password=input('Twitterのパスワード: '), token=input('Discordのトークン: '))
+        connect_db(user_id=input('Twitter(X) UserName: '), password=input('Twitter(X) Password: '), token=input('discard token: '))
     if not arg.reset_login and not arg.refresh_login and not arg.reset_token and not arg.remove_all:
         _, __, TOKEN = connect_db()
         print('BOT Starting...')
