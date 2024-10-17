@@ -253,7 +253,7 @@ def TimeCount():
                 SSec = '0{}'.format(Sec)
             else:
                 SSec = '{}'.format(Sec)
-            print('稼働時間: {}year, {}week, {}day, {}:{}:{}'.format(SYear, SWeek, SDay, SHour, SMinute, SSec), end='\r', flush=True)
+            print('Uptime: {}year, {}week, {}day, {}:{}:{}'.format(SYear, SWeek, SDay, SHour, SMinute, SSec), end='\r', flush=True)
             time.sleep(1)
             Uptimeloop.append(i + 1)
 
