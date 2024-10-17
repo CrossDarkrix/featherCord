@@ -2,9 +2,9 @@
 シンプルなツイート取得DiscordBot
 
 ## 実行に必要なモジュール
-・py-cord
+・[py-cord](https://github.com/Pycord-Development/pycord)
 
-・tweety-ns
+・[tweety-ns](https://github.com/mahrtayyab/tweety)
 
 ## ※実行の注意
 ### 非公式apiを使っているので自己責任でお願いします。
