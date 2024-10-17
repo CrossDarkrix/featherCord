@@ -1,14 +1,17 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import argparse
 import concurrent.futures
-import discord
 import os
-import signal
 import shutil
+import signal
 import sqlite3
 import ssl
 import sys
 import time
 
+import discord
 from discord.ext import commands, tasks
 from tweety import Twitter
 
@@ -21,7 +24,6 @@ except Exception:
 Bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
 task_data = []
-url_list = [{}]
 stopped = [False]
 
 
@@ -91,7 +93,6 @@ class TweetDiscord(commands.Cog):
     def __init__(self, Bot: commands.Bot):
         self.bot = Bot
         self.twitter = Tweeter()
-        self.data = {'': {'url': ''}}
 
     @discord.slash_command(name="set_tweet", description="設定したアカウントのツイートを監視します")
     async def set_tweet(self, cx: discord.ApplicationContext, username: str = ''):
@@ -99,9 +100,8 @@ class TweetDiscord(commands.Cog):
             await cx.response.send_message(content='監視ユーザーを設定しました 設定ユーザー名: {}'.format(username), ephemeral=True)
         except:
             pass
-        self.data = {'TwUser': username, username: {'url': ''}}
         _urls = []
-        task = tasks.loop(seconds=45)(self.auto_refresh_for_new_tweet)
+        task = tasks.loop(seconds=60)(self.auto_refresh_for_new_tweet)
         task_data.append({"username": username, "task_list": task})
         task.start(username, cx, _urls)
 
@@ -119,108 +119,25 @@ class TweetDiscord(commands.Cog):
         now_url = self.twitter.new_tweet(user)
         if string_detect(now_url):
             _urls.append(now_url)
-            if 2 <= len(url_list):
-                for data in url_list:
-                    if data['TwUser'] == user:
-                        if data[user]['url'] != now_url:
-                            data[user]['url'] = now_url
-                            try:
-                                if now_url.split('/')[2] == 'x.com':
-                                    now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
-                                else:
-                                    now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                                if now_url.split('/')[2][0:4] == 'fxfx':
-                                    now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                                await cx.send(content=now_url)
-                                url_list.append(data)
-                            except IndexError:
-                                data[user]['url'] = now_url
-                                try:
-                                    now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                                    if now_url.split('/')[2][0:4] == 'fxfx':
-                                        now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                                    await cx.send(content=now_url)
-                                    url_list.append(data)
-                                except:
-                                    pass
-                            except:
-                                try:
-                                    now_url = self.twitter.old_tweet(user)
-                                    data[user]['url'] = now_url
-                                    if now_url.split('/')[2] == 'x.com':
-                                        now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
-                                    else:
-                                        now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                                    if now_url.split('/')[2][0:4] == 'fxfx':
-                                        now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                                    await cx.send(content=now_url)
-                                    url_list.append(data)
-                                except IndexError:
-                                    data[user]['url'] = now_url
-                                    try:
-                                        now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                                        if now_url.split('/')[2][0:4] == 'fxfx':
-                                            now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                                        await cx.send(content=now_url)
-                                        url_list.append(data)
-                                    except:
-                                        pass
-                                except:
-                                    pass
-                    else:
-                        continue
-                if not self.search(user, url_list):
-                    _data = {'TwUser': user, user: {'url': ''}}
-                    _data[user]['url'] = now_url
-                    try:
-                        if now_url.split('/')[2] == 'x.com':
-                            now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
-                        else:
-                            now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                        if now_url.split('/')[2][0:4] == 'fxfx':
-                            now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                        await cx.send(content=now_url)
-                        url_list.append(_data)
-                    except IndexError:
-                        _data[user]['url'] = now_url
-                        try:
-                            now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                            if now_url.split('/')[2][0:4] == 'fxfx':
-                                now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                            await cx.send(content=now_url)
-                            url_list.append(_data)
-                        except:
-                            pass
-                    except:
-                        try:
-                            now_url = self.twitter.old_tweet(user)
-                            _data[user]['url'] = now_url
-                            if now_url.split('/')[2] == 'x.com':
-                                now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
-                            else:
-                                now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                            if now_url.split('/')[2][0:4] == 'fxfx':
-                                now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                            await cx.send(content=now_url)
-                            url_list.append(_data)
-                        except IndexError:
-                            now_url = self.twitter.old_tweet(user)
-                            _data[user]['url'] = now_url
-                            try:
-                                now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                                if now_url.split('/')[2][0:4] == 'fxfx':
-                                    now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                                await cx.send(content=now_url)
-                                url_list.append(_data)
-                            except:
-                                pass
-                        except:
-                            pass
-            else:
-                _data = {'TwUser': user, user: {'url': ''}}
-                _data[user]['url'] = now_url
-                url_list[0] = _data
+            try:
+                if now_url.split('/')[2] == 'x.com':
+                    now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
+                else:
+                    now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
+                if now_url.split('/')[2][0:4] == 'fxfx':
+                    now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
+                await cx.send(content=now_url)
+            except IndexError:
                 try:
+                    now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
+                    if now_url.split('/')[2][0:4] == 'fxfx':
+                        now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
+                    await cx.send(content=now_url)
+                except:
+                    pass
+            except:
+                try:
+                    now_url = self.twitter.old_tweet(user)
                     if now_url.split('/')[2] == 'x.com':
                         now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
                     else:
@@ -228,52 +145,17 @@ class TweetDiscord(commands.Cog):
                     if now_url.split('/')[2][0:4] == 'fxfx':
                         now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
                     await cx.send(content=now_url)
-                    url_list.append(_data)
                 except IndexError:
-                    _data[user]['url'] = now_url
                     try:
                         now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
                         if now_url.split('/')[2][0:4] == 'fxfx':
                             now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
                         await cx.send(content=now_url)
-                        url_list.append(_data)
                     except:
                         pass
                 except:
-                    try:
-                        now_url = self.twitter.old_tweet(user)
-                        _data[user]['url'] = now_url
-                        if now_url.split('/')[2] == 'x.com':
-                            now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
-                        else:
-                            now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                        if now_url.split('/')[2][0:4] == 'fxfx':
-                            now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                        await cx.send(content=now_url)
-                        url_list.append(_data)
-                    except IndexError:
-                        try:
-                            now_url = self.twitter.old_tweet(user)
-                            _data[user]['url'] = now_url
-                            now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                            if now_url.split('/')[2][0:4] == 'fxfx':
-                                now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                            await cx.send(content=now_url)
-                            url_list.append(_data)
-                        except:
-                            pass
-                    except:
-                        pass
-            url_list[0:] = list({u['TwUser']: u for u in url_list}.values())
+                    pass
             _urls[0:] = list(set(_urls))
-
-    def search(self, key, lists):
-        result = False
-        for t in lists:
-            if key in t.keys():
-                result = True
-                break
-        return result
 
     @discord.slash_command(name="set_stop", description="指定したアカウントの監視を停止します")
     async def set_stop(self, cx: discord.ApplicationContext, user_name):
@@ -292,7 +174,7 @@ class TweetDiscord(commands.Cog):
         except:
             pass
 
-    @discord.slash_command(name="get_tweet", description="設定したアカウントの最新のツイートを取得します")
+    @discord.slash_command(name="get_tweet", description="指定したアカウントの最新のポストを取得します")
     async def get_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         text = self.twitter.new_tweet(username)
         if text != '':
@@ -300,8 +182,8 @@ class TweetDiscord(commands.Cog):
         else:
             await cx.response.send_message(content='ツイートの取得に失敗しました', ephemeral=True)
 
-    @discord.slash_command(name="stopall", description="Botを停止します")
-    async def stopall(self, cx: discord.ApplicationContext):
+    @discord.slash_command(name="stop_all", description="Botをシャットダウンします")
+    async def stop_all(self, cx: discord.ApplicationContext):
         await cx.delete()
         print('Bot is Stopped!')
         stopped[0] = True
@@ -314,7 +196,7 @@ class TweetDiscord(commands.Cog):
 
 @Bot.event
 async def on_ready():
-    await Bot.change_presence(activity=discord.Game('BOTが正常に起動ました！(v1.0.0)'))
+    await Bot.change_presence(activity=discord.Game('BOTは正常に起動(v0.0.1)'))
 
 
 def TimeCount():
