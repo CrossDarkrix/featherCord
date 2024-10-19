@@ -6,7 +6,7 @@ A simple get tweet link bot.
 
 ・[tweety-ns](https://github.com/mahrtayyab/tweety)
 
-> [!important]
+> [!IMPORTANT]
 > tweety-ns use Unofficial Twitter API!(abusing tweety-ns can lead to "read only" twitter account)
 
 ## Commands
