@@ -8,7 +8,7 @@
 
 ・[tweety-ns](https://github.com/mahrtayyab/tweety)
 
-> [!※実行の注意]
+> [! ※実行の注意]
 > 非公式apiを使っているので自己責任でお願いします。tweety-nsを悪用するとTwitterアカウントが凍結される可能性もあります。
 
 ## 機能
