@@ -8,6 +8,10 @@ a simple tweet transfer bot.
 </div>
 
 
+## 📝Description
+this bot is a near real-time tweet link transfer bot.
+
+
 ## Requirement Modules
 ・[py-cord](https://github.com/Pycord-Development/pycord)
 
