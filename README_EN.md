@@ -1,5 +1,12 @@
-# Tweet to DiscordBot
-A simple get tweet link bot.
+<div align="center">
+	<a href="https://github.com/CrossDarkrix/featherCord">
+	<img width="200px" height="200px" alt="featherCord" src="https://raw.githubusercontent.com/CrossDarkrix/featherCord/main/images/feathercord.png"></a>
+
+# featherCord
+a simple tweet transfer bot.
+
+</div>
+
 
 ## Requirement Modules
 ・[py-cord](https://github.com/Pycord-Development/pycord)
