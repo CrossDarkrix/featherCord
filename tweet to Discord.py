@@ -101,7 +101,7 @@ class TweetDiscord(commands.Cog):
         except:
             pass
         _urls = []
-        task = tasks.loop(seconds=60)(self.auto_refresh_for_new_tweet)
+        task = tasks.loop(seconds=48)(self.auto_refresh_for_new_tweet)
         task_data.append({"username": username, "task_list": task})
         task.start(username, cx, _urls)
 
