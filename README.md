@@ -4,8 +4,9 @@
 
 # featherCord
 a simple tweet transfer bot.
-</div>
+
 [English Version](https://github.com/CrossDarkrix/Tweet_to_discord/blob/main/README_EN.md)
+</div>
 
 ## 実行に必要なモジュール
 ・[py-cord](https://github.com/Pycord-Development/pycord)
