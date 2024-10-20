@@ -1,6 +1,6 @@
 <div align="center">
 	<a href="https://github.com/CrossDarkrix/featherCord">
-	<img width="200px" height="200px" alt="featherCord" src="https://raw.githubusercontent.com/CrossDarkrix/featherCord/main/image/feathercord.png"></a>
+	<img width="200px" height="200px" alt="featherCord" src="https://raw.githubusercontent.com/CrossDarkrix/featherCord/main/images/feathercord.png"></a>
 </div>
 # featherCord
 a simple tweet transfer bot.
