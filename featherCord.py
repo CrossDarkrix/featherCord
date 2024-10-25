@@ -263,19 +263,11 @@ def TimeCount():
 def main():
     ArgumentPaerser = argparse.ArgumentParser(description='TweetDiscord')
     ArgumentPaerser.add_argument('--reset-login', '-rl', action='store_true', help='reset login data for twitter.')
-    ArgumentPaerser.add_argument('--refresh-login', '-rfl', action='store_true', help='refresh twitter login data')
     ArgumentPaerser.add_argument('--reset-token', '-rt', action='store_true', help='reset discord token')
     ArgumentPaerser.add_argument('--remove-all', '-ra', action='store_true', help='all account data delete')
     arg = ArgumentPaerser.parse_args()
     if arg.reset_login:
         print('reset login data')
-        try:
-            os.remove(os.path.join(os.getcwd(), '.setting_twitter', 'loginInfo.db'))
-        except:
-            pass
-        connect_db(user_id=input('Twitter(X) UserName: '), password=input('Twitter(X) Password: '))
-    if arg.refresh_login:
-        print('refresh login data')
         connect_db(user_id=input('Twitter(X) UserName: '), password=input('Twitter(X) Password: '))
     if arg.reset_token:
         print('reset token')
