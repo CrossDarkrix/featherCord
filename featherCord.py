@@ -281,7 +281,7 @@ def main():
             print('error')
     if not os.path.exists(os.path.join(os.getcwd(), '.setting_twitter', 'loginInfo.db')):
         connect_db(user_id=input('Twitter(X) UserName: '), password=input('Twitter(X) Password: '), token=input('discard token: '))
-    if not arg.reset_login and not arg.refresh_login and not arg.reset_token and not arg.remove_all:
+    if not arg.reset_login and not arg.reset_token and not arg.remove_all:
         _, __, TOKEN = connect_db()
         print('BOT Starting...')
         TimeCount()
