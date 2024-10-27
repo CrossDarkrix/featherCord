@@ -280,15 +280,14 @@ def main():
             print('完了!')
         except:
             print('何らかのエラーで削除できませんでした')
-    if arg.normal_start:
-        if not os.path.exists(os.path.join(os.getcwd(), '.setting_twitter', 'loginInfo.db')):
-            connect_db(user_id=input('Twitterのユーザー名: '), password=input('Twitterのパスワード: '), token=input('DiscordBOTのトークン: '))
-        if not arg.reset_login and not arg.reset_token and not arg.remove_all:
-            _, __, TOKEN = connect_db()
-            print('BOTの起動中...')
-            TimeCount()
-            Bot.add_cog(TweetDiscord(Bot))
-            Bot.run(TOKEN)
+    if not os.path.exists(os.path.join(os.getcwd(), '.setting_twitter', 'loginInfo.db')):
+        connect_db(user_id=input('Twitterのユーザー名: '), password=input('Twitterのパスワード: '), token=input('DiscordBOTのトークン: '))
+    if not arg.reset_login and not arg.reset_token and not arg.remove_all:
+        _, __, TOKEN = connect_db()
+        print('BOTの起動中...')
+        TimeCount()
+        Bot.add_cog(TweetDiscord(Bot))
+        Bot.run(TOKEN)
 
 
 if __name__ == '__main__':
