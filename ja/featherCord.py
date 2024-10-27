@@ -265,7 +265,6 @@ def main():
     ArgumentPaerser.add_argument('--reset-login', '-rl', action='store_true', help='Twitterのログイン情報をリセットします')
     ArgumentPaerser.add_argument('--reset-token', '-rt', action='store_true', help='Discordのトークン情報をリセットします')
     ArgumentPaerser.add_argument('--remove-all', '-ra', action='store_true', help='全てのログイン情報を消去します')
-    ArgumentPaerser.add_argument('--normal-start', '-ns', action='store_true', help='通常起動します')
     arg = ArgumentPaerser.parse_args()
     if arg.reset_login:
         print('ログイン情報をリセットします')
