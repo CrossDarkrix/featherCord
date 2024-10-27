@@ -260,7 +260,7 @@ def TimeCount():
     concurrent.futures.ThreadPoolExecutor().submit(TimeCounter)
 
 
-def main(args):
+def main():
     ArgumentPaerser = argparse.ArgumentParser(description='TweetDiscord')
     ArgumentPaerser.add_argument('--reset-login', '-rl', action='store_true', help='Twitterのログイン情報をリセットします')
     ArgumentPaerser.add_argument('--reset-token', '-rt', action='store_true', help='Discordのトークン情報をリセットします')
@@ -293,6 +293,6 @@ def main(args):
 
 if __name__ == '__main__':
     try:
-        main(sys.argv[1:])
+        main()
     except OSError:
         pass
