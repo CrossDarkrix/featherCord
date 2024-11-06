@@ -12,7 +12,7 @@ import sys
 import time
 
 import discord
-from discord.ext import commands, tasks,
+from discord.ext import commands, tasks
 from discord.ext.commands import Bot as Bots
 from tweety import Twitter
 
