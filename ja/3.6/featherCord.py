@@ -12,7 +12,8 @@ import sys
 import time
 
 import discord
-from discord.ext import commands, tasks
+from discord.ext import commands, tasks, 
+from discord.ext.commands import Bot as Bots
 from tweety import Twitter
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -94,7 +95,7 @@ class TweetDiscord(commands.Cog):
         self.bot = Bot
         self.twitter = Tweeter()
 
-    @discord.Bot.slash_command(name="set_tweet", description="設定したアカウントのツイートを監視します")
+    @Bots.slash_command(name="set_tweet", description="設定したアカウントのツイートを監視します")
     async def set_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         try:
             await cx.response.send_message(content='監視ユーザーを設定しました 設定ユーザー名: {}'.format(username), ephemeral=True)
@@ -157,7 +158,7 @@ class TweetDiscord(commands.Cog):
                     pass
             _urls[0:] = list(set(_urls))
 
-    @discord.Bot.slash_command(name="set_stop", description="指定したアカウントの監視を停止します")
+    @Bots.slash_command(name="set_stop", description="指定したアカウントの監視を停止します")
     async def set_stop(self, cx: discord.ApplicationContext, user_name):
         for _json in task_data:
             if _json["username"] == user_name:
@@ -174,7 +175,7 @@ class TweetDiscord(commands.Cog):
         except:
             pass
 
-    @discord.Bot.slash_command(name="get_tweet", description="指定したアカウントの最新のポストを取得します")
+    @Bots.slash_command(name="get_tweet", description="指定したアカウントの最新のポストを取得します")
     async def get_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         text = self.twitter.new_tweet(username)
         if text != '':
@@ -182,7 +183,7 @@ class TweetDiscord(commands.Cog):
         else:
             await cx.response.send_message(content='ツイートの取得に失敗しました', ephemeral=True)
 
-    @discord.Bot.slash_command(name="stop_all", description="Botをシャットダウンします")
+    @Bots.slash_command(name="stop_all", description="Botをシャットダウンします")
     async def stop_all(self, cx: discord.ApplicationContext):
         await cx.delete()
         print('Bot is Stopped!')
