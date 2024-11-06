@@ -10,20 +10,21 @@ import sqlite3
 import ssl
 import sys
 import time
-
 import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot as Bots
 from tweety import Twitter
 
+
 ssl._create_default_https_context = ssl._create_unverified_context
 intents = discord.Intents.default()
+
 try:
     intents.message_content = True
 except Exception:
     pass
-Bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
+Bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 task_data = []
 stopped = [False]
 
