@@ -88,7 +88,7 @@ class TweetDiscord(commands.Cog):
         task_data.append({"username": username, "task_list": task})
         task.start(username, cx, _urls)
 
-    @discord.slash_command(name="recovery_set_tweet", description="設定したアカウントのツイートを監視します")
+    @discord.slash_command(name="recovery_set_tweet", description="以前設定したアカウントのツイートを再監視します")
     async def recovery_set_tweet(self, cx: discord.commands.context.ApplicationContext):
         if os.path.exists(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json')):
             with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
