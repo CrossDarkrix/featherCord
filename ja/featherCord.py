@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import asyncio
 import argparse
 import concurrent.futures
 import os
@@ -75,33 +76,68 @@ class Tweeter(object):
                 except:
                     return 'ツイートの取得に失敗しました'
 
-    def old_tweet(self, user):
-        try:
-            return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[1].url
-        except:
-            try:
-                tweet, _ = self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[1]
-                return tweet.url
-            except:
-                try:
-                    return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[1].url
-                except:
-                    return 'ツイートの取得に失敗しました'
-
 
 class TweetDiscord(commands.Cog):
     def __init__(self, Bot: commands.Bot):
         self.bot = Bot
         self.twitter = Tweeter()
 
+    async def recover_set_tweet(self, cx: discord.TextChannel, username: str = ''):
+        _urls = []
+        task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
+        task_data.append({"username": username, "task_list": task})
+        task.start(username, cx, _urls)
+
+    @discord.slash_command(name="recovery_set_tweet", description="設定したアカウントのツイートを監視します")
+    async def recovery_set_tweet(self, cx: discord.commands.context.ApplicationContext):
+        if os.path.exists(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json')):
+            with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
+                channel_jsn = json.load(scl)
+            for channel in cx.guild.channels:
+                try:
+                    await self.recover_set_tweet(channel, channel_jsn['{}'.format(channel.id)])
+                    await asyncio.sleep(1.2)
+                except KeyError:
+                    continue
+                except Exception as Err:
+                    print(Err)
+            try:
+                await cx.response.send_message(content='監視ユーザーを一斉設定しました', ephemeral=True)
+            except:
+                pass
+        else:
+            try:
+                await cx.response.send_message(content='エラー: 設定ファイルがありません。', ephemeral=True)
+            except:
+                pass
+
+    @discord.slash_command(name="delete_json", description="監視ユーザーリストを初期化します")
+    async def delete_json(self, cx: discord.commands.context.ApplicationContext):
+        try:
+            os.remove(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'))
+        except:
+            pass
+        try:
+            await cx.response.send_message(content='削除しました', ephemeral=True)
+        except:
+            pass
+
     @discord.slash_command(name="set_tweet", description="設定したアカウントのツイートを監視します")
-    async def set_tweet(self, cx: discord.ApplicationContext, username: str = ''):
+    async def set_tweet(self, cx: discord.commands.context.ApplicationContext, username: str = ''):
+        if os.path.exists(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json')):
+            with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
+                channel_jsn = json.load(scl)
+        else:
+            channel_jsn = dict()
+        channel_jsn['{}'.format(cx.channel_id)] = username
+        with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'w', encoding='utf-8') as jsn_w:
+            json.dump(channel_jsn, jsn_w, ensure_ascii=False, indent=4)
         try:
             await cx.response.send_message(content='監視ユーザーを設定しました 設定ユーザー名: {}'.format(username), ephemeral=True)
         except:
             pass
         _urls = []
-        task = tasks.loop(seconds=48)(self.auto_refresh_for_new_tweet)
+        task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
         task_data.append({"username": username, "task_list": task})
         task.start(username, cx, _urls)
 
@@ -136,25 +172,7 @@ class TweetDiscord(commands.Cog):
                 except:
                     pass
             except:
-                try:
-                    now_url = self.twitter.old_tweet(user)
-                    if now_url.split('/')[2] == 'x.com':
-                        now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
-                    else:
-                        now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                    if now_url.split('/')[2][0:4] == 'fxfx':
-                        now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                    await cx.send(content=now_url)
-                except IndexError:
-                    try:
-                        now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                        if now_url.split('/')[2][0:4] == 'fxfx':
-                            now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                        await cx.send(content=now_url)
-                    except:
-                        pass
-                except:
-                    pass
+                pass
             _urls[0:] = list(set(_urls))
 
     @discord.slash_command(name="set_stop", description="指定したアカウントの監視を停止します")

@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import asyncio
 import argparse
 import concurrent.futures
-import os
-import shutil
 import signal
-import sqlite3
+import os
 import ssl
 import sys
 import time
+import threading
+import json
 
 import discord
 from discord.ext import commands, tasks
@@ -73,20 +74,7 @@ class Tweeter(object):
                 try:
                     return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[0].url
                 except:
-                    return 'no get post'
-
-    def old_tweet(self, user):
-        try:
-            return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[1].url
-        except:
-            try:
-                tweet, _ = self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[1]
-                return tweet.url
-            except:
-                try:
-                    return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[1].url
-                except:
-                    return 'no get post'
+                    return 'ツイートの取得に失敗しました'
 
 
 class TweetDiscord(commands.Cog):
@@ -94,14 +82,62 @@ class TweetDiscord(commands.Cog):
         self.bot = Bot
         self.twitter = Tweeter()
 
+    async def recover_set_tweet(self, cx: discord.TextChannel, username: str = ''):
+        _urls = []
+        task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
+        task_data.append({"username": username, "task_list": task})
+        task.start(username, cx, _urls)
+
+    @discord.slash_command(name="recovery_set_tweet", description="recovery monitoring set account posts")
+    async def recovery_set_tweet(self, cx: discord.commands.context.ApplicationContext):
+        if os.path.exists(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json')):
+            with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
+                channel_jsn = json.load(scl)
+            for channel in cx.guild.channels:
+                try:
+                    await self.recover_set_tweet(channel, channel_jsn['{}'.format(channel.id)])
+                    await asyncio.sleep(2.5)
+                except KeyError:
+                    continue
+                except Exception as Err:
+                    print(Err)
+            try:
+                await cx.response.send_message(content='set all account', ephemeral=True)
+            except:
+                pass
+        else:
+            try:
+                await cx.response.send_message(content='error: setting file not found', ephemeral=True)
+            except:
+                pass
+
+    @discord.slash_command(name="delete_json", description="delete seting file")
+    async def delete_json(self, cx: discord.commands.context.ApplicationContext):
+        try:
+            os.remove(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'))
+        except:
+            pass
+        try:
+            await cx.response.send_message(content='done', ephemeral=True)
+        except:
+            pass
+
     @discord.slash_command(name="set_tweet", description="monitoring set account posts")
-    async def set_tweet(self, cx: discord.ApplicationContext, username: str = ''):
+    async def set_tweet(self, cx: discord.commands.context.ApplicationContext, username: str = ''):
+        if os.path.exists(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json')):
+            with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
+                channel_jsn = json.load(scl)
+        else:
+            channel_jsn = dict()
+        channel_jsn['{}'.format(cx.channel_id)] = username
+        with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'w', encoding='utf-8') as jsn_w:
+            json.dump(channel_jsn, jsn_w, ensure_ascii=False, indent=4)
         try:
             await cx.response.send_message(content='set UserName: {}'.format(username), ephemeral=True)
         except:
             pass
         _urls = []
-        task = tasks.loop(seconds=48)(self.auto_refresh_for_new_tweet)
+        task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
         task_data.append({"username": username, "task_list": task})
         task.start(username, cx, _urls)
 
@@ -136,28 +172,10 @@ class TweetDiscord(commands.Cog):
                 except:
                     pass
             except:
-                try:
-                    now_url = self.twitter.old_tweet(user)
-                    if now_url.split('/')[2] == 'x.com':
-                        now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
-                    else:
-                        now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                    if now_url.split('/')[2][0:4] == 'fxfx':
-                        now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                    await cx.send(content=now_url)
-                except IndexError:
-                    try:
-                        now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                        if now_url.split('/')[2][0:4] == 'fxfx':
-                            now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                        await cx.send(content=now_url)
-                    except:
-                        pass
-                except:
-                    pass
+                pass
             _urls[0:] = list(set(_urls))
 
-    @discord.slash_command(name="set_stop", description="stop monitoring account")
+    @discord.slash_command(name="set_stop", description="stop monitoring account.")
     async def set_stop(self, cx: discord.ApplicationContext, user_name):
         for _json in task_data:
             if _json["username"] == user_name:
@@ -174,7 +192,7 @@ class TweetDiscord(commands.Cog):
         except:
             pass
 
-    @discord.slash_command(name="get_tweet", description="get select account posts")
+    @discord.slash_command(name="get_tweet", description="get new post")
     async def get_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         text = self.twitter.new_tweet(username)
         if text != '':
