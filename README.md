@@ -29,3 +29,4 @@ a simple tweet transfer bot.
 
 ・/stop_all: Botをシャットダウンします
 
+・/recovery_set_tweet: set_tweetの設定を再設定します。

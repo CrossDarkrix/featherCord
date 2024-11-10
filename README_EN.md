@@ -21,11 +21,12 @@ this bot is a near real-time tweet link transfer bot.
 > tweety-ns use Unofficial Twitter API!(abusing tweety-ns can lead to "read only" twitter account)
 
 ## Commands
-・/set_tweet: monitoring set account posts
+・/set_tweet: monitoring set account posts.
 
-・/get_tweet: get select account posts
+・/get_tweet: get select account posts.
 
 ・/set_stop: stop monitoring account.
 
-・/stop_all: shutdown bot
+・/stop_all: shutdown bot.
 
+・/recovery_set_tweet: recover set_tweet setting.
