@@ -83,27 +83,26 @@ class TweetDiscord(commands.Cog):
         self.bot = Bot
         self.twitter = Tweeter()
 
-    async def recover_set_tweet(self, cx: discord.TextChannel, username: str = ''):
-        _urls = []
-        task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
-        task_data.append({"username": username, "task_list": task})
-        task.start(username, cx, _urls)
-
     @discord.slash_command(name="recovery_set_tweet", description="recovery monitoring set account posts")
     async def recovery_set_tweet(self, cx: discord.commands.context.ApplicationContext):
+        def recover_set_tweet(cxx: discord.TextChannel, username: str = ''):
+            _urls = []
+            task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
+            task_data.append({"username": username, "task_list": task})
+            task.start(username, cxx, _urls)
+
         if os.path.exists(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json')):
             with open(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
                 channel_jsn = json.load(scl)
             for channel in cx.guild.channels:
                 try:
-                    await self.recover_set_tweet(channel, channel_jsn['{}'.format(channel.id)])
-                    await asyncio.sleep(2.5)
+                    recover_set_tweet(channel, channel_jsn['{}'.format(channel.id)])
                 except KeyError:
                     continue
                 except Exception as Err:
                     print(Err)
             try:
-                await cx.response.send_message(content='set all account', ephemeral=True)
+                await cx.response.send_message(content='all monitoring account was setting', ephemeral=True)
             except:
                 pass
         else:
