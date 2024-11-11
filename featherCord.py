@@ -7,6 +7,7 @@ import concurrent.futures
 import signal
 import os
 import ssl
+import sqlite3
 import sys
 import time
 import threading
