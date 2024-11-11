@@ -90,8 +90,8 @@ class TweetDiscord(commands.Cog):
 
     @discord.slash_command(name="recovery_set_tweet", description="以前設定したアカウントのツイートを再監視します")
     async def recovery_set_tweet(self, cx: discord.commands.context.ApplicationContext):
-        if os.path.exists(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json')):
-            with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
+        if os.path.exists(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json')):
+            with open(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
                 channel_jsn = json.load(scl)
             for channel in cx.guild.channels:
                 try:
@@ -114,7 +114,7 @@ class TweetDiscord(commands.Cog):
     @discord.slash_command(name="delete_json", description="監視ユーザーリストを初期化します")
     async def delete_json(self, cx: discord.commands.context.ApplicationContext):
         try:
-            os.remove(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'))
+            os.remove(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json'))
         except:
             pass
         try:
@@ -124,13 +124,13 @@ class TweetDiscord(commands.Cog):
 
     @discord.slash_command(name="set_tweet", description="設定したアカウントのツイートを監視します")
     async def set_tweet(self, cx: discord.commands.context.ApplicationContext, username: str = ''):
-        if os.path.exists(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json')):
-            with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
+        if os.path.exists(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json')):
+            with open(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
                 channel_jsn = json.load(scl)
         else:
             channel_jsn = dict()
         channel_jsn['{}'.format(cx.channel_id)] = username
-        with open(os.path.join(os.getenv('HOME'), 'Documents', '.setting_twitter', 'set_channel.json'), 'w', encoding='utf-8') as jsn_w:
+        with open(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json'), 'w', encoding='utf-8') as jsn_w:
             json.dump(channel_jsn, jsn_w, ensure_ascii=False, indent=4)
         try:
             await cx.response.send_message(content='監視ユーザーを設定しました 設定ユーザー名: {}'.format(username), ephemeral=True)
