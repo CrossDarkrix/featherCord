@@ -79,8 +79,7 @@ class Tweeter(object):
 
 
 class TweetDiscord(commands.Cog):
-    def __init__(self, Bot: commands.Bot):
-        self.bot = Bot
+    def __init__(self):
         self.twitter = Tweeter()
 
     @commands.slash_command(name="recovery_set_tweet", description="recovery monitoring set account posts")
