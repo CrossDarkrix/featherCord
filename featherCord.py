@@ -87,7 +87,7 @@ class TweetDiscord(commands.Cog):
     async def recovery_set_tweet(self, cx: discord.commands.context.ApplicationContext):
         def recover_set_tweet(cxx: discord.TextChannel, username: str = ''):
             _urls = []
-            task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
+            task = tasks.loop(seconds=57)(self.auto_refresh_for_new_tweet)
             task_data.append({"username": username, "task_list": task})
             task.start(username, cxx, _urls)
 
@@ -137,7 +137,7 @@ class TweetDiscord(commands.Cog):
         except:
             pass
         _urls = []
-        task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
+        task = tasks.loop(seconds=57)(self.auto_refresh_for_new_tweet)
         task_data.append({"username": username, "task_list": task})
         task.start(username, cx, _urls)
 
