@@ -79,15 +79,14 @@ class Tweeter(object):
 
 
 class TweetDiscord(commands.Cog):
-    def __init__(self, Bot: commands.Bot):
-        self.bot = Bot
+    def __init__(self):
         self.twitter = Tweeter()
 
-    @discord.slash_command(name="recovery_set_tweet", description="以前設定したアカウントのツイートを再監視します")
+    @commands.slash_command(name="recovery_set_tweet", description="設定したアカウントのツイートを再度監視します")
     async def recovery_set_tweet(self, cx: discord.commands.context.ApplicationContext):
         def recover_set_tweet(cxx: discord.TextChannel, username: str = ''):
             _urls = []
-            task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
+            task = tasks.loop(seconds=57)(self.auto_refresh_for_new_tweet)
             task_data.append({"username": username, "task_list": task})
             task.start(username, cxx, _urls)
 
@@ -111,7 +110,7 @@ class TweetDiscord(commands.Cog):
             except:
                 pass
 
-    @discord.slash_command(name="delete_json", description="監視ユーザーリストを初期化します")
+    @commands.slash_command(name="delete_json", description="監視ユーザーリストを初期化します")
     async def delete_json(self, cx: discord.commands.context.ApplicationContext):
         try:
             os.remove(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json'))
@@ -122,7 +121,7 @@ class TweetDiscord(commands.Cog):
         except:
             pass
 
-    @discord.slash_command(name="set_tweet", description="設定したアカウントのツイートを監視します")
+    @commands.slash_command(name="set_tweet", description="設定したアカウントのツイートを監視します")
     async def set_tweet(self, cx: discord.commands.context.ApplicationContext, username: str = ''):
         if os.path.exists(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json')):
             with open(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json'), 'r', encoding='utf-8') as scl:
@@ -137,7 +136,7 @@ class TweetDiscord(commands.Cog):
         except:
             pass
         _urls = []
-        task = tasks.loop(seconds=47)(self.auto_refresh_for_new_tweet)
+        task = tasks.loop(seconds=57)(self.auto_refresh_for_new_tweet)
         task_data.append({"username": username, "task_list": task})
         task.start(username, cx, _urls)
 
@@ -175,7 +174,7 @@ class TweetDiscord(commands.Cog):
                 pass
             _urls[0:] = list(set(_urls))
 
-    @discord.slash_command(name="set_stop", description="指定したアカウントの監視を停止します")
+    @commands.slash_command(name="set_stop", description="指定したアカウントの監視を停止します")
     async def set_stop(self, cx: discord.ApplicationContext, user_name):
         for _json in task_data:
             if _json["username"] == user_name:
@@ -192,7 +191,7 @@ class TweetDiscord(commands.Cog):
         except:
             pass
 
-    @discord.slash_command(name="get_tweet", description="指定したアカウントの最新のポストを取得します")
+    @commands.slash_command(name="get_tweet", description="指定したアカウントの最新のポストを取得します")
     async def get_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         text = self.twitter.new_tweet(username)
         if text != '':
@@ -200,7 +199,7 @@ class TweetDiscord(commands.Cog):
         else:
             await cx.response.send_message(content='ツイートの取得に失敗しました', ephemeral=True)
 
-    @discord.slash_command(name="stop_all", description="Botをシャットダウンします")
+    @commands.slash_command(name="stop_all", description="Botをシャットダウンします")
     async def stop_all(self, cx: discord.ApplicationContext):
         await cx.delete()
         print('Bot is Stopped!')
