@@ -11,6 +11,7 @@ import sqlite3
 import ssl
 import sys
 import time
+import json
 
 import discord
 from discord.ext import commands, tasks
