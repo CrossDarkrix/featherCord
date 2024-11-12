@@ -194,7 +194,7 @@ class TweetDiscord(commands.Cog):
     @commands.slash_command(name="get_tweet", description="指定したアカウントの最新のポストを取得します")
     async def get_tweet(self, cx: discord.ApplicationContext, username: str = ''):
         text = self.twitter.new_tweet(username)
-        if text != '':
+        if text != 'ツイートの取得に失敗しました':
             await cx.response.send_message(content=text, ephemeral=True)
         else:
             await cx.response.send_message(content='ツイートの取得に失敗しました', ephemeral=True)
@@ -302,7 +302,7 @@ def main():
         _, __, TOKEN = connect_db()
         print('BOTの起動中...')
         TimeCount()
-        Bot.add_cog(TweetDiscord(Bot))
+        Bot.add_cog(TweetDiscord())
         Bot.run(TOKEN)
 
 
