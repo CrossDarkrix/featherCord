@@ -15,7 +15,7 @@ import json
 
 import discord
 from discord.ext import commands, tasks
-from tweety import Twitter
+from tweety import TwitterAsync
 
 ssl._create_default_https_context = ssl._create_unverified_context
 intents = discord.Intents.default()
@@ -59,23 +59,24 @@ def connect_db(user_id: str='', password: str='', token: str=''):
 
 class Tweeter(object):
     def __init__(self):
-        self.app = Twitter('session')
-        username, password, _ = connect_db()
-        self.app.sign_in(username, password)
-        self.kill = 0
+        asyncio.run(self._login())
 
-    def new_tweet(self, user):
+    async def _login(self):
+        self.app = TwitterAsync('session')
+        username, password, _ = connect_db()
+        await self.app.sign_in(username, password)
+
+    async def new_tweet(self, user):
         try:
-            return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[0].url
-        except:
-            try:
-                tweet, _ = self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3)[0]
+            for tweet in await self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3):
                 return tweet.url
-            except:
-                try:
-                    return self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3).tweets[0].url
-                except:
-                    return 'no get tweet'
+        except Exception as Err:
+            Err = '{}'.format(Err)
+            if '[88]' in Err:
+                return 'rate limited please, retry again.'
+            else:
+                print(Err)
+                return 'no get tweet'
 
 
 class TweetDiscord(commands.Cog):
@@ -132,7 +133,7 @@ class TweetDiscord(commands.Cog):
         with open(os.path.join(os.getcwd(), '.setting_twitter', 'set_channel.json'), 'w', encoding='utf-8') as jsn_w:
             json.dump(channel_jsn, jsn_w, ensure_ascii=False, indent=4)
         try:
-            await cx.response.send_message(content='監視ユーザーを設定しました 設定ユーザー名: {}'.format(username), ephemeral=True)
+            await cx.response.send_message(content='set UserName: {}'.format(username), ephemeral=True)
         except:
             pass
         _urls = []
@@ -151,40 +152,7 @@ class TweetDiscord(commands.Cog):
             else:
                 return True
 
-        now_url = self.twitter.new_tweet(user)
-        if string_detect(now_url):
-            _urls.append(now_url)
-            try:
-                if now_url.split('/')[2] == 'x.com':
-                    now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
-                else:
-                    now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                if now_url.split('/')[2][0:4] == 'fxfx':
-                    now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                await cx.send(content=now_url)
-            except IndexError:
-                try:
-                    now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
-                    if now_url.split('/')[2][0:4] == 'fxfx':
-                        now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
-                    await cx.send(content=now_url)
-                except:
-                    pass
-            except:
-                pass
-            _urls[0:] = list(set(_urls))
-
-        def string_detect(string_text: str) -> bool:
-            len_text = 0
-            for strings in _urls:
-                if strings == string_text:
-                    len_text += 1
-            if 1 <= len_text:
-                return False
-            else:
-                return True
-
-        now_url = self.twitter.new_tweet(user)
+        now_url = await self.twitter.new_tweet(user)
         if string_detect(now_url):
             _urls.append(now_url)
             try:
@@ -226,9 +194,25 @@ class TweetDiscord(commands.Cog):
 
     @commands.slash_command(name="get_tweet", description="get new post")
     async def get_tweet(self, cx: discord.ApplicationContext, username: str = ''):
-        text = self.twitter.new_tweet(username)
-        if text != 'no get tweet':
-            await cx.response.send_message(content=text, ephemeral=True)
+        now_url = await self.twitter.new_tweet(username)
+        try:
+            if now_url.split('/')[2] == 'x.com':
+                now_url = 'fxtwitter.com'.join(now_url.split('x.com'))
+            else:
+                now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
+            if now_url.split('/')[2][0:4] == 'fxfx':
+                now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
+        except IndexError:
+            try:
+                now_url = 'fxtwitter.com'.join(now_url.split('twitter.com'))
+                if now_url.split('/')[2][0:4] == 'fxfx':
+                    now_url = now_url.replace(now_url.split('/')[2], 'fxtwitter.com')
+            except:
+                pass
+        except:
+            pass
+        if now_url != 'no get tweet':
+            await cx.response.send_message(content=now_url, ephemeral=True)
         else:
             await cx.response.send_message(content='no get post', ephemeral=True)
 
