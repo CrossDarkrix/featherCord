@@ -69,7 +69,11 @@ class Tweeter(object):
     async def new_tweet(self, user):
         try:
             for tweet in await self.app.get_tweets(username=user, pages=1, replies=False, wait_time=3):
-                return tweet.url
+                try:
+                    for tw in tweet.tweets:
+                        return tw._get_url()
+                except:
+                    return tweet._get_url()
         except Exception as Err:
             Err = '{}'.format(Err)
             if '[88]' in Err:
